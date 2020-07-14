@@ -18,8 +18,9 @@ app.layout = html.Div(children=[
 
     html.H2(children='My Instagram Network'),
 
+    html.Div(html.A("@k_xuanlim", href='http://instagram.com/k_xuanlim/', target="_blank")),
     html.Div(html.A("View my code", href='https://github.com/kahxuan/insta_clustering', target="_blank")),
-    html.Div(html.A("Visit my Instagram", href='http://instagram.com/k_xuanlim/', target="_blank")),
+    
 
     dcc.Graph(
         id='network-graph',
