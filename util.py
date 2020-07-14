@@ -3,6 +3,13 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import plotly.graph_objects as go
 
+def generate_username():
+    username = names.get_full_name().lower().replace(' ', '_')
+    for _ in range(random.randint(0, 5)):
+        username += str(random.randint(0, 9))
+    return username
+    
+
 def gen_adjacency_matrix(connections):
     user_num = len(connections.keys())
     matrix = np.zeros((user_num, user_num), dtype='int64')
@@ -63,7 +70,7 @@ def merge_clusters(clusters, centroids, dist, threshold):
     return clusters, centroids, merged
 
 
-def split_cluster(centroids, clusters, dist, threshold=5):
+def split_cluster(centroids, clusters, dist, threshold=4.5):
     for i, cluster in enumerate(clusters):
         cluster_dist = get_cluster_dist(dist, cluster)
         row, col = np.unravel_index(cluster_dist.argmax(), cluster_dist.shape)
@@ -172,12 +179,10 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, my_username):
     # create figure
     fig = go.Figure(data=traces,
              layout=go.Layout(
-                title=my_username + "'s Instagram Network",
-                titlefont_size=16,
                 hovermode='closest',
                 xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                 yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
 
     fig.update_layout(plot_bgcolor='#ffffff')
     
-    fig.show()
+    return fig

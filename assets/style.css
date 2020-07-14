@@ -1,0 +1,19 @@
+body {
+    padding: 10px;
+    font-family: sans-serif;
+    font-weight: lighter;
+    text-align: center;
+}
+
+div {
+    margin-bottom: 10px;
+}
+
+a {
+    text-decoration: none;
+    color: #929292;
+}
+
+a:hover {
+    font-weight: bold;
+}

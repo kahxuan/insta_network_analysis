@@ -1,15 +1,10 @@
 import os
 import names
 import random
+from util import generate_username
 
 data_dir = 'data'
 masked_data_dir = 'hashed'
-
-def generate_username():
-    username = names.get_full_name().lower().replace(' ', '_')
-    for _ in range(random.randint(0, 5)):
-        username += str(random.randint(0, 9))
-    return username
 
 users = [file[:-4] for file in os.listdir(data_dir)]
 users_to_hname = dict(zip(users, [generate_username() for _ in range(len(users))]))

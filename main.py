@@ -1,5 +1,6 @@
 import os
 import copy
+import json
 from util import *
 
 data_dir = 'masked'
@@ -30,7 +31,7 @@ for file in os.listdir(data_dir):
 
 # param
 cluster_no = users_num
-merge_threshold = 2
+merge_threshold = 2.2
 
 adjacencym = gen_adjacency_matrix(connections)
 dist = floyd_warshall(copy.deepcopy(adjacencym), connections)
@@ -38,4 +39,15 @@ clusters = kmeans(dist, connections.keys(), cluster_no, merge_threshold)
 adjacencym[adjacencym == users_num + 1] = 0
 
 cluster_names = ['cluster ' + str(i + 1) for i in range(len(clusters))]
-plot_network(adjacencym, clusters, cluster_names, id_to_name, my_username)
+fig = plot_network(adjacencym, clusters, cluster_names, id_to_name, my_username)
+fig.show()
+
+res = {}
+res['my_username'] = my_username
+res['id_to_name'] = id_to_name
+res['adjacencym'] = adjacencym.tolist()
+res['clusters'] = clusters
+res['cluster_names'] = cluster_names
+
+with open('result.json', 'w') as f:
+    json.dump(res, f)
