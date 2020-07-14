@@ -1,1 +1,1 @@
-gunicorn app:app.server -b localhost:8000
+web: gunicorn app:server --timeout 300
