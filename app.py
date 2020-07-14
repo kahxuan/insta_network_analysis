@@ -6,6 +6,7 @@ import dash_html_components as html
 from util import plot_network
 
 app = dash.Dash(__name__)
+server = app.server
 app.title = 'Instagram Network Visualisation'
 
 with open('result.json') as f:
