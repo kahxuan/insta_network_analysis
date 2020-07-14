@@ -23,6 +23,58 @@ def floyd_warshall(dist, connections):
     return dist
 
 
+def get_cluster_dist(dist, cluster):
+    cluster_dist = np.take(dist, cluster, axis=0)
+    cluster_dist = np.take(cluster_dist, cluster, axis=1)
+    return cluster_dist
+
+
+def get_centroids(clusters, dist):
+    centroids = [0] * len(clusters)
+    for i, cluster in enumerate(clusters):
+        cluster_dist = get_cluster_dist(dist, cluster)
+        dist_sum = cluster_dist.sum(axis=1) / len(cluster)
+        dist_sum += cluster_dist.min(axis=1) * 0.7
+        centroids[i] = cluster[np.where(dist_sum == min(dist_sum))[0][0]]
+    return centroids
+
+
+def merge_clusters(clusters, centroids, dist, threshold):
+    merged = False
+    for i in range(len(clusters)):
+
+        min_loss = len(clusters) + 1
+        min_j = -1
+
+        for j in range(i + 1, len(clusters)):
+
+            tmp = sum(np.take(dist[:, centroids[i]], clusters[j]))
+            tmp = tmp / len(clusters[j])
+
+            if tmp <= threshold and tmp < min_loss:
+                min_j = j
+                min_loss = tmp
+
+        if min_j != -1:
+            centroids.pop(min_j)
+            clusters[i] += clusters.pop(min_j)
+            merged = True
+
+    return clusters, centroids, merged
+
+
+def split_cluster(centroids, clusters, dist, threshold=5):
+    for i, cluster in enumerate(clusters):
+        cluster_dist = get_cluster_dist(dist, cluster)
+        row, col = np.unravel_index(cluster_dist.argmax(), cluster_dist.shape)
+        if cluster_dist[row, col] >= threshold:
+            centroids.pop(i)
+            centroids.append(cluster[row])
+            centroids.append(cluster[col])
+            return centroids, True
+    return centroids, False
+
+
 def assign_cluster(node, centroids, dist):
     min_centroids, min_dist = 0, dist[centroids[0]][node]
     for i in range(1, len(centroids)):
@@ -40,38 +92,6 @@ def form_clusters(centroids, node_list, dist):
     return clusters
 
 
-def get_cluster_dist(dist, cluster):
-    cluster_dist = np.take(dist, cluster, axis=0)
-    cluster_dist = np.take(cluster_dist, cluster, axis=1)
-    return cluster_dist
-
-
-def get_centroids(clusters, dist):
-    centroids = [0] * len(clusters)
-    for i, cluster in enumerate(clusters):
-        cluster_dist = get_cluster_dist(dist, cluster)
-        dist_sum = cluster_dist.sum(axis=1)
-        centroids[i] = cluster[np.where(dist_sum == min(dist_sum))[0][0]]
-    return centroids
-
-
-def get_loss(clusters, centroids, dist):
-    loss = 0
-    for i in range(len(centroids)):        
-        loss += sum(np.take(dist[centroids[i], :], clusters[i])) / (len(clusters[i]) / 1.5)
-    return loss
-
-
-def merge_clusters(clusters, centroids, dist, threshold=3):
-    for i in range(len(centroids)):
-        for j in range(i + 1, len(centroids)):
-            if dist[centroids[i]][centroids[j]] <= threshold:
-                centroids.pop(j)
-                clusters[i] += clusters.pop(j)
-                return clusters, centroids, True
-    return clusters, centroids, False
-
-
 def converge(centroids, node_list, dist):
     for _ in range(3):
         clusters = form_clusters(centroids, node_list, dist)
@@ -79,45 +99,26 @@ def converge(centroids, node_list, dist):
     return clusters, centroids
 
 
-def split_cluster(centroids, clusters, dist, threshold=5):
-    for i, cluster in enumerate(clusters):
-        cluster_dist = get_cluster_dist(dist, cluster)
-        row, col = np.unravel_index(cluster_dist.argmax(), cluster_dist.shape)
-        if cluster_dist[row, col] >= threshold:
-            centroids.pop(i)
-            centroids.append(cluster[row])
-            centroids.append(cluster[col])
-            return centroids, True
-    return centroids, False
+def kmeans(dist, node_list, cluster_no, merge_threshold):
 
+    max_iter = 500
+    clusters = [[node] for node in node_list]
+    centroids = get_centroids(clusters, dist)
 
-def kmeans(dist, node_list, cluster_no, merge_threshold, split_threshold):
-    centroids = np.random.choice(np.array(list(node_list)), size=cluster_no, replace=False)
-    clusters, centroids = converge(centroids, node_list, dist)
+    merged = True
     
-    clusters, centroids, merged = merge_clusters(clusters, centroids, dist, merge_threshold)
-    clusters, centroids = converge(centroids, node_list, dist)
-    centroids, split = split_cluster(centroids, clusters, dist, split_threshold)
-    clusters, centroids = converge(centroids, node_list, dist)
-    
-    op_loss = get_loss(clusters, centroids, dist)
-    op_clusters = clusters
-    
-    for i in range(100):
-        
-        if not split and not merged:
-            return op_clusters
+    for i in range(max_iter):
+
+        if not merged:
+            return clusters
         
         clusters, centroids, merged = merge_clusters(clusters, centroids, dist, merge_threshold)
-        clusters, centroids = converge(centroids, node_list, dist)
-        
-        centroids, split = split_cluster(centroids, clusters, dist, split_threshold)
-        clusters, centroids = converge(centroids, node_list, dist)
-        
-        cur_loss = get_loss(clusters, centroids, dist)
-        if cur_loss < op_loss:
-            op_loss = cur_loss
-            op_clusters = clusters
+        centroids = get_centroids(clusters, dist)
+
+        split = True
+        while split:
+            centroids, split = split_cluster(centroids, clusters, dist)
+            clusters, centroids = converge(centroids, node_list, dist)
 
     return clusters
 
@@ -139,7 +140,7 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, my_username):
 
     edge_trace = go.Scatter(
         x=edge_x, y=edge_y,
-        line=dict(width=0.3, color='rgba(190, 190, 190, 0.5)'),
+        line=dict(width=0.4, color='rgba(190, 190, 190, 0.5)'),
         hoverinfo='none',
         mode='lines',
         name='connection')
@@ -162,7 +163,6 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, my_username):
             text=[id_to_name[uid] for uid in cluster],
             hovertemplate='%{text}<br>(' + legend_names[i] + ')<extra></extra>',
             marker=dict(
-                # color='rgb' + str(tuple(np.random.randint(1, 255, size=3))),
                 colorscale='YlGnBu',
                 size=7), 
             name=legend_names[i])

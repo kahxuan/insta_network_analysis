@@ -2,7 +2,7 @@ import os
 import copy
 from util import *
 
-data_dir = 'hashed'
+data_dir = 'masked'
 my_username = 'k_xuanlim'
 
 connections = {}
@@ -29,13 +29,12 @@ for file in os.listdir(data_dir):
     connections[uid] = hashed_ff
 
 # param
-cluster_no = 15
-merge_threshold = 3
-split_threshold = 4
+cluster_no = users_num
+merge_threshold = 2
 
 adjacencym = gen_adjacency_matrix(connections)
 dist = floyd_warshall(copy.deepcopy(adjacencym), connections)
-clusters = kmeans(dist, connections.keys(), cluster_no, merge_threshold, split_threshold)
+clusters = kmeans(dist, connections.keys(), cluster_no, merge_threshold)
 adjacencym[adjacencym == users_num + 1] = 0
 
 cluster_names = ['cluster ' + str(i + 1) for i in range(len(clusters))]
