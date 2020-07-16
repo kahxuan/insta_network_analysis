@@ -70,11 +70,11 @@ def merge_clusters(clusters, centroids, dist, threshold):
     return clusters, centroids, merged
 
 
-def split_cluster(centroids, clusters, dist, threshold=4.5):
+def split_cluster(centroids, clusters, dist, threshold=4):
     for i, cluster in enumerate(clusters):
         cluster_dist = get_cluster_dist(dist, cluster)
         row, col = np.unravel_index(cluster_dist.argmax(), cluster_dist.shape)
-        if cluster_dist[row, col] >= threshold:
+        if cluster_dist[row, col] >= threshold or cluster_dist.mean() >= threshold/2:
             centroids.pop(i)
             centroids.append(cluster[row])
             centroids.append(cluster[col])
@@ -106,9 +106,9 @@ def converge(centroids, node_list, dist):
     return clusters, centroids
 
 
-def kmeans(dist, node_list, cluster_no, merge_threshold):
+def kmeans(dist, node_list, cluster_no, merge_threshold, split_threshold):
 
-    max_iter = 500
+    max_iter = 100
     clusters = [[node] for node in node_list]
     centroids = get_centroids(clusters, dist)
 
@@ -124,17 +124,17 @@ def kmeans(dist, node_list, cluster_no, merge_threshold):
 
         split = True
         while split:
-            centroids, split = split_cluster(centroids, clusters, dist)
+            centroids, split = split_cluster(centroids, clusters, dist, split_threshold)
             clusters, centroids = converge(centroids, node_list, dist)
 
     return clusters
 
 
-def plot_network(adjacencym, clusters, legend_names, id_to_name, my_username):
+def plot_network(adjacencym, clusters, legend_names, id_to_name, seed=None):
 
     traces = []
     G = nx.from_numpy_matrix(adjacencym) 
-    pos = nx.spring_layout(G)
+    pos = nx.spring_layout(G, seed=seed)
     
     # edge trace
     edge_x = []

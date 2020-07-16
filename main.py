@@ -32,14 +32,15 @@ for file in os.listdir(data_dir):
 # param
 cluster_no = users_num
 merge_threshold = 2.2
+split_threshold = 4
 
 adjacencym = gen_adjacency_matrix(connections)
 dist = floyd_warshall(copy.deepcopy(adjacencym), connections)
-clusters = kmeans(dist, connections.keys(), cluster_no, merge_threshold)
+clusters = kmeans(dist, connections.keys(), cluster_no, merge_threshold, split_threshold)
 adjacencym[adjacencym == users_num + 1] = 0
 
 cluster_names = ['cluster ' + str(i + 1) for i in range(len(clusters))]
-fig = plot_network(adjacencym, clusters, cluster_names, id_to_name, my_username)
+fig = plot_network(adjacencym, clusters, cluster_names, id_to_name)
 fig.show()
 
 res = {}
@@ -49,5 +50,5 @@ res['adjacencym'] = adjacencym.tolist()
 res['clusters'] = clusters
 res['cluster_names'] = cluster_names
 
-with open('result.json', 'w') as f:
+with open('result2.json', 'w') as f:
     json.dump(res, f)

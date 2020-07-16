@@ -1,12 +1,39 @@
 body {
-    padding: 10px;
     font-family: sans-serif;
     font-weight: lighter;
-    text-align: center;
+    margin: 20px;
 }
 
-div {
+.header-div {
+    text-align: center;
     margin-bottom: 10px;
+}
+
+.graph-div {
+    border-style: solid;
+    border-width: 0.5px;
+    border-color: gray;
+    border-radius: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 10px;
+}
+
+.graph-desc {
+    padding-bottom: 10px;
+}
+
+.graph-block {
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.footer-div {
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: 40px;
 }
 
 a {
