@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
 import plotly.graph_objects as go
+import names
+import random
+
 
 def generate_username():
     username = names.get_full_name().lower().replace(' ', '_')
@@ -37,13 +40,18 @@ def get_cluster_dist(dist, cluster):
     return cluster_dist
 
 
+def get_dist_score(cluster_dist):
+    dist_score = cluster_dist.sum(axis=1) / len(cluster_dist)
+    dist_score += cluster_dist.min(axis=1) * 0.7
+    return dist_score
+
+
 def get_centroids(clusters, dist):
     centroids = [0] * len(clusters)
     for i, cluster in enumerate(clusters):
         cluster_dist = get_cluster_dist(dist, cluster)
-        dist_sum = cluster_dist.sum(axis=1) / len(cluster)
-        dist_sum += cluster_dist.min(axis=1) * 0.7
-        centroids[i] = cluster[np.where(dist_sum == min(dist_sum))[0][0]]
+        dist_score = get_dist_score(cluster_dist)
+        centroids[i] = cluster[np.where(dist_score == min(dist_score))[0][0]]
     return centroids
 
 
@@ -170,20 +178,186 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, seed=None):
             mode='markers',
             text=[id_to_name[uid] for uid in cluster],
             hovertemplate='%{text}<br>(' + legend_names[i] + ')<extra></extra>',
-            marker=dict(
-                colorscale='YlGnBu',
-                size=7), 
+            marker=dict(colorscale='YlGnBu', size=7), 
             name=legend_names[i])
 
         traces.append(node_trace)
-    
-    # create figure
-    fig = go.Figure(data=traces,
-             layout=go.Layout(
-                hovermode='closest',
-                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
 
-    fig.update_layout(plot_bgcolor='#ffffff')
+    # configure layout
+    layout = go.Layout(
+        hovermode='closest',
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+
+    # create figure
+    fig = go.Figure(data=traces, layout=layout)
+
+    # fig.update_layout(plot_bgcolor='#ffffff')
     
     return fig
+
+
+def plot_users(user_stats):
+
+    fig = go.Figure()
+
+    trace1 = go.Scatter(
+        x=user_stats[0], 
+        y=user_stats[1],
+        mode='lines',
+        text=user_stats[1],
+        hovertemplate='%{text}<extra></extra>',
+        name='Over my network size')
+
+    trace2 = go.Scatter(
+        x=user_stats[0], 
+        y=user_stats[2],
+        mode='lines',
+        text=user_stats[2],
+        hovertemplate='%{text}<extra></extra>',
+        name="Over friend's network size")
+
+    layout = go.Layout(
+
+        showlegend = True,
+        hovermode  = 'x',
+
+        xaxis = dict(
+            showspikes=True,
+            spikemode='across+toaxis',
+            spikedash='solid',
+            showline=True,
+            showgrid=False, 
+            showticklabels=True),
+
+        yaxis = dict(
+            title="Percentage of mutual connections",
+            fixedrange=True,
+            showline=True,
+            showgrid=True, 
+            showticklabels=True),
+
+        legend = dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1))
+
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
+
+    return fig
+
+
+def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
+
+    cluster_ids = list(range(1, len(sizes) + 1))
+
+    traces = []
+
+    for i in cluster_ids:
+        if mins[i - i] != maxs[i - 1]:
+            traces.append(go.Scatter(
+                hoverinfo='none',
+                x=[i, i], y=[mins[i - 1], maxs[i - 1]],
+                line=dict(width=2, color='gray'),
+                mode='lines',
+                showlegend=False))
+
+    traces.append(go.Scatter(
+        x=cluster_ids,
+        y=avgs,
+        mode="markers",
+        showlegend=False,
+        text = avgs,
+        hovertemplate='Avg: %{text}<extra></extra>',
+        marker=dict(color=sizes, size=10, showscale=True)))
+
+    traces.append(go.Scatter(
+        x=cluster_ids,
+        y=mins,
+        mode="markers",
+        showlegend=False,
+        text = mins,
+        hovertemplate='Min: %{text}<extra></extra>',
+        marker=dict(color=sizes, size=10)))
+
+    traces.append(go.Scatter(
+        x=cluster_ids,
+        y=maxs,
+        mode="markers",
+        showlegend=False,
+        text = maxs,
+        hovertemplate='Max: %{text}<extra></extra>',
+        marker=dict(color=sizes, size=10)))
+
+    
+    fig = go.Figure(data=traces)
+
+    layout = go.Layout(
+        showlegend = True,
+        hovermode  = 'x',
+        xaxis = dict(
+            title="Cluster",
+            fixedrange=False,
+            showspikes=False,
+            spikemode='across+toaxis',
+            showline=True,
+            showgrid=False, 
+            showticklabels=True),
+
+        yaxis = dict(
+            title="Shortest path between users",
+            fixedrange=True,
+            showline=True,
+            showgrid=True, 
+            showticklabels=True))
+    fig.update_layout(layout)
+
+    return fig
+
+
+
+def plot_closeness(closeness, cluster_names):
+    
+    trace = go.Heatmap(
+        z=closeness, 
+        x=cluster_names, 
+        y=cluster_names, 
+        colorbar=dict(title='Closeness'))
+    
+    layout = go.Layout(
+        xaxis=dict(showgrid=False, fixedrange=True),
+        yaxis=dict(showgrid=False, fixedrange=True))
+
+    fig = go.Figure(data=trace, layout=layout)
+
+    return fig
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
