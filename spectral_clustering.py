@@ -7,7 +7,10 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 
-data_dir = 'masked'
+from sklearn.cluster import SpectralClustering
+from sklearn.utils.validation import check_symmetric
+
+data_dir = 'data'
 my_username = 'k_xuanlim'
 
 connections = {}
@@ -33,42 +36,19 @@ for file in os.listdir(data_dir):
     hashed_ff = [name_to_id[friend] for friend in shared_friends]
     connections[uid] = hashed_ff
 
-# param
-cluster_no = users_num
-merge_threshold = 3
-split_threshold = 5
-
 adjacencym = gen_adjacency_matrix(connections)
 dist = floyd_warshall(copy.deepcopy(adjacencym), connections)
-clusters = kmeans(dist, connections.keys(), cluster_no, merge_threshold, split_threshold)
+
+cluster_n = 10
+sc = SpectralClustering(cluster_n, affinity='precomputed', n_init=100, assign_labels='discretize')
+x = sc.fit_predict(dist)
+
+clusters = [[] for _ in range(cluster_n)]
+for i in range(len(x)):
+    clusters[x[i]].append(i)
+
 adjacencym[adjacencym == users_num + 1] = 0
 
 cluster_names = ['cluster ' + str(i + 1) for i in range(len(clusters))]
 fig = plot_network(adjacencym, clusters, cluster_names, id_to_name)
 fig.show()
-
-res = {}
-res['my_username'] = my_username
-res['id_to_name'] = id_to_name
-res['adjacencym'] = adjacencym.tolist()
-res['clusters'] = clusters
-res['cluster_names'] = cluster_names
-
-with open('result1.json', 'w') as f:
-    json.dump(res, f)
-
-
-# app = dash.Dash(__name__)
-
-# app.layout = html.Div(children=[
-#     dcc.Graph(
-#         id='example-graph',
-#         figure=plot_network(np.array(res['adjacencym']), 
-#             res['clusters'], 
-#             res['cluster_names'], 
-#             {int(key): value for key, value in res['id_to_name'].items()})
-#     )
-# ])
-
-# if __name__ == '__main__':
-#     app.run_server(debug=True)

@@ -27,6 +27,7 @@ def floyd_warshall(dist, connections):
         for u in range(n):
             for v in range(n):
                 dist[u][v] = min(dist[u][v], dist[u][k] + dist[k][v])
+                dist[v][u] = dist[u][v]
     return dist
 
 
