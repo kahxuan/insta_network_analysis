@@ -191,6 +191,7 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, seed=None):
 
     # configure layout
     layout = go.Layout(
+        font=dict(family='Georgia'),
         hovermode='closest',
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
@@ -229,6 +230,7 @@ def plot_users(user_stats):
         name="Over friend's network size")
 
     layout = go.Layout(
+        font=dict(family='Georgia'),
         margin=go.layout.Margin(l=0, r=0, b=30, t=0),
         showlegend = True,
         hovermode  = 'x',
@@ -317,6 +319,7 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
     fig = go.Figure(data=traces)
 
     layout = go.Layout(
+        font=dict(family='Georgia'),
         showlegend = True,
         hovermode  = 'x',
         coloraxis = {'colorscale':'teal'},
@@ -360,6 +363,7 @@ def plot_closeness(closeness):
         colorbar=dict(thickness=10, title='Deg'))
     
     layout = go.Layout(
+        font=dict(family='Georgia'),
         xaxis=dict(showgrid=False, fixedrange=True, linecolor=LINE_COLOR, title='Cluster'),
         yaxis=dict(showgrid=False, fixedrange=True, linecolor=LINE_COLOR, title='Cluster'),
         margin=go.layout.Margin(l=0, r=0, b=0, t=0),

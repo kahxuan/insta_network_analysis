@@ -11,20 +11,24 @@ from util import plot_users, plot_network, plot_clusters, plot_closeness
 def render_tab(name, res_dict):
 
     tab_style = {
+        'padding-top': '15px',
         'height': 50, 
         'margin-top': 20, 
         'margin-bottom': 2, 
         'margin-left': 2, 
         'margin-right': 2, 
-        # 'background-color': '#e6e6e6',
-        'background-color': '#ffffff',
+        'background-color': 'rgba(256, 256, 256, 0.8)',
         'border-style': 'solid',
         'border-radius': 7,
         'border-width': 0,
-        'border-color': 'white'
+        'border-color': 'white',
+        'overflow': 'hidden',
+        'width': '45%'
     }
 
     tab_style_selected = {
+        'padding-top': '15px',
+        'align-items': 'center',
         'height': 50, 
         'margin-top': 20, 
         'margin-bottom': 2, 
@@ -34,7 +38,9 @@ def render_tab(name, res_dict):
         'border-style': 'solid',
         'border-radius': 7,
         'border-width': 2,
-        'border-color': '#3b738f'
+        'border-color': '#3b738f',
+        'overflow': 'hidden',
+        'width': '55%'
     }
 
 
@@ -135,9 +141,33 @@ app.layout = html.Div([
 
             html.Div(className="div-desc", children=[
 
+                html.Div(className="div-title", 
+                    children=html.Span(className="title", children='Instagram Network Analysis')
+                ),
+
                 html.Div(className="div-desc-inner", children=[
-                    html.Div('Instagram Network Analysis', , className="title"),
-                    html.Div('xxxxx', className="caption")
+
+                    
+
+                    html.Div(className="links", children=[
+
+                        html.A(
+                            '@' + group1['my_username'], 
+                            href='https://www.instagram.com/' + group1['my_username'],
+                            target="_blank"
+                        ),
+
+                        html.A(
+                            'View my code', 
+                            href='https://github.com/kahxuan/insta_network_analysis',
+                            target="_blank"
+                        ),
+
+                    ]),
+
+                    html.Div(className="caption", children="On the plot, click and drag to zoom in, double click to rescale."),
+                    html.Div(className="caption", children="On the legend, click or double click to filter."),
+                    html.Div(className="caption", children='Usernames in the network are masked with randomly generated string.')
                 ])
 
             ]),
