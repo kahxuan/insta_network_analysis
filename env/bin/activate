@@ -28,7 +28,7 @@ deactivate () {
     fi
 
     unset VIRTUAL_ENV
-    if [ ! "${1:-}" = "nondestructive" ] ; then
+    if [ ! "$1" = "nondestructive" ] ; then
     # Self destruct!
         unset -f deactivate
     fi
@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/kx/Desktop/git_insta_clustering/insta_clustering/env"
+VIRTUAL_ENV="/Users/kx/Docs/git_insta_clustering/insta_clustering/env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

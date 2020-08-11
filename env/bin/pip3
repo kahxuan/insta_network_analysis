@@ -1,4 +1,5 @@
-#!/Users/kx/Desktop/git_insta_clustering/insta_clustering/env/bin/python3
+#!/Users/kx/Docs/git_insta_clustering/insta_clustering/env/bin/python3
+
 # -*- coding: utf-8 -*-
 import re
 import sys
