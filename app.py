@@ -1,73 +1,176 @@
+import os
 import json
 import random
 import numpy as np
+import pandas as pd
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from util import plot_network
+from util import plot_users, plot_network, plot_clusters, plot_closeness
+
+def render_tab(name, res_dict):
+
+    tab_style = {
+        'height': 50, 
+        'margin-top': 20, 
+        'margin-bottom': 2, 
+        'margin-left': 2, 
+        'margin-right': 2, 
+        # 'background-color': '#e6e6e6',
+        'background-color': '#ffffff',
+        'border-style': 'solid',
+        'border-radius': 7,
+        'border-width': 0,
+        'border-color': 'white'
+    }
+
+    tab_style_selected = {
+        'height': 50, 
+        'margin-top': 20, 
+        'margin-bottom': 2, 
+        'margin-left': 2, 
+        'margin-right': 2, 
+        'background-color': '#ffffff',
+        'border-style': 'solid',
+        'border-radius': 7,
+        'border-width': 2,
+        'border-color': '#3b738f'
+    }
+
+
+    return dcc.Tab(
+        label=name, 
+        style=tab_style,
+        selected_style=tab_style_selected, 
+        children=[
+            html.Div(className="div-btm", children=[
+
+                html.Div(className="div-btm-inner", children=[
+
+                    html.Div(className="div-network-graph", children=[
+
+                        html.Div(className="div-graph-btm", children=[
+
+                            html.Div(html.Span('Network Graph', className="graph-title"), className="div-graph-title"),
+
+                            dcc.Graph(
+                                className='graph-network',
+                                config={'displayModeBar': False},
+                                figure=plot_network(
+                                    np.array(res_dict['adjacencym']), 
+                                    res_dict['clusters'], 
+                                    res_dict['cluster_names'], 
+                                    {int(key): value for key, value in res_dict['id_to_name'].items()}, 
+                                    seed)
+                            )
+                        ])
+
+                    ]),
+
+                    html.Div(className="div-mma-graph", children=[
+
+                        html.Div(className="div-graph-btm", children=[
+
+                            html.Div(html.Span('Avg-Max-Min', className="graph-title"), className="div-graph-title"),
+
+                            dcc.Graph(
+                                className='graph-mma',
+                                config={'displayModeBar': False},
+                                figure=plot_clusters(
+                                    res_dict['cluster_size'], 
+                                    res_dict['cluster_max'], 
+                                    res_dict['cluster_min'], 
+                                    res_dict['cluster_avg'], 
+                                    res_dict['cluster_names'])
+                            )
+                        ])
+
+                    ]),
+
+                    html.Div(className="div-heatmap-graph", children=[
+
+                        html.Div(className="div-graph-btm", children=[
+                            
+                            html.Div(className="div-graph-btm", children=[
+
+                                html.Div(html.Span('Closeness Between Clusters', className="graph-title"), className="div-graph-title"),
+
+                                dcc.Graph(
+                                    className='graph-heatmap',
+                                    config={'displayModeBar': False},
+                                    figure=plot_closeness(
+                                        res_dict['closeness'])
+                                )
+                            ])
+                        ])
+                        
+                    ])
+
+                ])
+                
+        ])
+])
+
 
 app = dash.Dash(__name__)
 server = app.server
-app.title = 'Instagram Network Visualisation'
+app.title = 'Instagram Network Analysis'
 
-with open('result1.json') as f:
-    res1 = json.load(f)
+with open(os.path.join('output', 'cluster1.json')) as f:
+    group1 = json.load(f)
 
-with open('result2.json') as f:
-    res2 = json.load(f)
+with open(os.path.join('output', 'cluster2.json')) as f:
+    group2 = json.load(f)
+
+user_stats = pd.read_csv(os.path.join('output', 'user_stats.csv'), header=0, index_col=0)
+user_stats.columns = [0, 1, 2, 3]
 
 seed = random.randint(1, 100)
 
-app.layout = html.Div(children=[
+app.layout = html.Div([
 
-    html.H2(children='My Instagram Network', 
-        className='header-div'),
+    html.Div(className="div-top", children=[
 
-    html.Div(
-        html.A("@k_xuanlim", href='http://instagram.com/k_xuanlim/', target="_blank"), 
-        className='header-div'),
-    html.Div(
-        html.A("View my code", href='https://github.com/kahxuan/insta_clustering', target="_blank"), 
-        className='header-div'),
-    
-    
+        html.Div(className="div-top-inner", children=[
 
-    html.Div([
-            html.Span('Click and drag to zoom in, double click to rescale. On the legend, click to hide a cluster, double click to show only one specific cluster.', className='graph-desc'),
-            html.Div(
-                dcc.Graph(
-                    id='network-graph1',
-                    style={'height': 500},
-                    figure=plot_network(np.array(res1['adjacencym']), 
-                        res1['clusters'], 
-                        res1['cluster_names'], 
-                        {int(key): value for key, value in res1['id_to_name'].items()}, 
-                        seed)
-                    ),
-                className='graph-div')],
-        className='graph-block'
-    ),
+            html.Div(className="div-desc", children=[
 
+                html.Div(className="div-desc-inner", children=[
+                    html.Div('Instagram Network Analysis', , className="title"),
+                    html.Div('xxxxx', className="caption")
+                ])
 
-    html.Div([
-        html.Span('Users grouped into smaller clusters by decreasing threshold for cluster splitting.', className='graph-desc'),
-        html.Div(
-            dcc.Graph(
-                id='network-graph2',
-                style={'height': 500},
-                figure=plot_network(np.array(res2['adjacencym']), 
-                    res2['clusters'], 
-                    res2['cluster_names'], 
-                    {int(key): value for key, value in res2['id_to_name'].items()}, 
-                    seed)
-                ),
-            className='graph-div')],
-        className='graph-block'
-    ),
+            ]),
 
-    html.Div(children='* Usernames in the network are masked with randomly generated string',
-        className='footer-div'),
+            html.Div(className="div-user-graph", children=[
+
+                html.Div(className="div-graph-top", children=[
+
+                    html.Div(html.Span('Percentage of Mutual Connection', className="graph-title"), className="div-graph-title"),
+
+                        dcc.Graph(
+                            className='graph-user',
+                            config={'displayModeBar': False},
+                            figure=plot_users(user_stats)
+                        )   
+                ])         
+
+            ])
+        ])
+    ]),
+
+    dcc.Tabs(
+        parent_className='custom-tabs',
+        className='custom-tabs-container', 
+        children=[
+            render_tab('No. of clusters = 8', group1),
+            render_tab('No. of clusters = 16', group2)
+    ])
+
 ])
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -1,10 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import networkx as nx
+import plotly.express as px
 import plotly.graph_objects as go
 import names
 import random
 
+BG_COLOR_WHITE = '#ffffff'
+BG_COLOR_GRAY = '#e6e6e6'
+LINE_COLOR = '#e6e6e6'
 
 def generate_username():
     username = names.get_full_name().lower().replace(' ', '_')
@@ -141,6 +145,8 @@ def kmeans(dist, node_list, cluster_no, merge_threshold, split_threshold):
 
 def plot_network(adjacencym, clusters, legend_names, id_to_name, seed=None):
 
+    marker_colors = px.colors.qualitative.T10 + px.colors.qualitative.Set2
+
     traces = []
     G = nx.from_numpy_matrix(adjacencym) 
     pos = nx.spring_layout(G, seed=seed)
@@ -178,7 +184,7 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, seed=None):
             mode='markers',
             text=[id_to_name[uid] for uid in cluster],
             hovertemplate='%{text}<br>(' + legend_names[i] + ')<extra></extra>',
-            marker=dict(colorscale='YlGnBu', size=7), 
+            marker=dict(color=marker_colors[i], size=7), 
             name=legend_names[i])
 
         traces.append(node_trace)
@@ -187,7 +193,10 @@ def plot_network(adjacencym, clusters, legend_names, id_to_name, seed=None):
     layout = go.Layout(
         hovermode='closest',
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+        margin=go.layout.Margin(l=0, r=0, b=0, t=0),
+        paper_bgcolor=BG_COLOR_WHITE,
+        plot_bgcolor=BG_COLOR_WHITE)
 
     # create figure
     fig = go.Figure(data=traces, layout=layout)
@@ -206,35 +215,43 @@ def plot_users(user_stats):
         y=user_stats[1],
         mode='lines',
         text=user_stats[1],
-        hovertemplate='%{text}<extra></extra>',
-        name='Over my network size')
+        hoverinfo='x+y',
+        name='Over my network size',
+        line=dict(color='#3b738f'))
 
     trace2 = go.Scatter(
         x=user_stats[0], 
         y=user_stats[2],
         mode='lines',
         text=user_stats[2],
-        hovertemplate='%{text}<extra></extra>',
+        hoverinfo='x+y',
+        line=dict(color='#ee8080'),
         name="Over friend's network size")
 
     layout = go.Layout(
-
+        margin=go.layout.Margin(l=0, r=0, b=30, t=0),
         showlegend = True,
         hovermode  = 'x',
+        paper_bgcolor=BG_COLOR_WHITE,
+        plot_bgcolor=BG_COLOR_WHITE,
 
         xaxis = dict(
+            title="User",
             showspikes=True,
             spikemode='across+toaxis',
             spikedash='solid',
             showline=True,
             showgrid=False, 
-            showticklabels=True),
+            linecolor=LINE_COLOR,
+            showticklabels=False),
 
         yaxis = dict(
-            title="Percentage of mutual connections",
+            title="Percentage",
             fixedrange=True,
             showline=True,
             showgrid=True, 
+            gridcolor=LINE_COLOR,
+            linecolor=LINE_COLOR,
             showticklabels=True),
 
         legend = dict(
@@ -271,7 +288,12 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
         showlegend=False,
         text = avgs,
         hovertemplate='Avg: %{text}<extra></extra>',
-        marker=dict(color=sizes, size=10, showscale=True)))
+        marker=dict(
+            color=sizes, 
+            colorbar=dict(thickness=10, title='Size'), 
+            coloraxis = "coloraxis",
+            size=10, 
+            showscale=True)))
 
     traces.append(go.Scatter(
         x=cluster_ids,
@@ -280,7 +302,7 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
         showlegend=False,
         text = mins,
         hovertemplate='Min: %{text}<extra></extra>',
-        marker=dict(color=sizes, size=10)))
+        marker=dict(color=sizes, coloraxis = "coloraxis", size=10)))
 
     traces.append(go.Scatter(
         x=cluster_ids,
@@ -289,7 +311,7 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
         showlegend=False,
         text = maxs,
         hovertemplate='Max: %{text}<extra></extra>',
-        marker=dict(color=sizes, size=10)))
+        marker=dict(color=sizes, coloraxis = "coloraxis", size=10)))
 
     
     fig = go.Figure(data=traces)
@@ -297,6 +319,7 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
     layout = go.Layout(
         showlegend = True,
         hovermode  = 'x',
+        coloraxis = {'colorscale':'teal'},
         xaxis = dict(
             title="Cluster",
             fixedrange=False,
@@ -304,6 +327,7 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
             spikemode='across+toaxis',
             showline=True,
             showgrid=False, 
+            linecolor=LINE_COLOR,
             showticklabels=True),
 
         yaxis = dict(
@@ -311,24 +335,37 @@ def plot_clusters(sizes, maxs, mins, avgs, cluster_names):
             fixedrange=True,
             showline=True,
             showgrid=True, 
-            showticklabels=True))
+            gridcolor=LINE_COLOR,
+            linecolor=LINE_COLOR,
+            showticklabels=True),
+            margin=go.layout.Margin(l=0, r=0, b=0, t=0),
+            paper_bgcolor=BG_COLOR_WHITE,
+            plot_bgcolor=BG_COLOR_WHITE)
     fig.update_layout(layout)
 
     return fig
 
 
 
-def plot_closeness(closeness, cluster_names):
+def plot_closeness(closeness):
+
+    cluster_ids = list(range(1, len(closeness) + 1))
     
     trace = go.Heatmap(
         z=closeness, 
-        x=cluster_names, 
-        y=cluster_names, 
-        colorbar=dict(title='Closeness'))
+        x=cluster_ids, 
+        y=cluster_ids, 
+        hovertemplate='cluster %{x}, cluster %{y}<br>Closeness: %{z} / 1<extra></extra>',
+        coloraxis = "coloraxis",
+        colorbar=dict(thickness=10, title='Deg'))
     
     layout = go.Layout(
-        xaxis=dict(showgrid=False, fixedrange=True),
-        yaxis=dict(showgrid=False, fixedrange=True))
+        xaxis=dict(showgrid=False, fixedrange=True, linecolor=LINE_COLOR, title='Cluster'),
+        yaxis=dict(showgrid=False, fixedrange=True, linecolor=LINE_COLOR, title='Cluster'),
+        margin=go.layout.Margin(l=0, r=0, b=0, t=0),
+        paper_bgcolor=BG_COLOR_WHITE,
+        plot_bgcolor=BG_COLOR_WHITE,
+        coloraxis = {'colorscale':'teal'})
 
     fig = go.Figure(data=trace, layout=layout)
 

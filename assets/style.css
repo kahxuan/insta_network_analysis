@@ -1,36 +1,132 @@
 body {
-    font-family: sans-serif;
-    font-weight: lighter;
-    margin: 20px;
-}
-
-.header-div {
-    text-align: center;
+    background-color: #e6e6e6;
+    margin-top: 22px;
     margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
 }
 
-.graph-div {
-    border-style: solid;
-    border-width: 0.5px;
-    border-color: gray;
-    border-radius: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-    margin-top: 10px;
+
+.div-top {
+    height: 300px;
+    display: flex;
+    width: 100%;
+    /*min-width: 1200px;*/
 }
 
-.graph-desc {
-    padding-bottom: 10px;
+.div-btm {
+    height: 430px;
+    display: flex;
+    width: 100%;
 }
 
-.graph-block {
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-bottom: 20px;
-    margin-top: 20px;
+.div-top-inner {
+    display: flex;
+    width: 100%;
 }
 
-.footer-div {
+.div-btm-inner {
+    display: flex;
+    width: 100%;
+}
+
+
+.div-desc {
+    width: 39%;
+    background-color: transparent;
+    border-radius: 7px;
+    padding: 3px;
+}
+
+
+.div-user-graph {
+    padding: 3px;
+    background-color: transparent;
+    width: 61%;
+}
+
+
+.div-network-graph {
+    padding: 3px;
+    background-color: transparent;
+    width: 48%;
+}
+
+.div-mma-graph {
+    padding: 3px;
+    width: 26%;
+}
+
+.div-heatmap-graph {
+    padding: 3px;
+    width: 26%;
+}
+
+
+.div-desc-inner {
+    width: 100%;
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 7px;
+}
+
+.div-graph-top {
+    width: 100%;
+    height: 300px;
+    background-color: #ffffff;
+    border-radius: 7px;
+    align-items: center;
+    justify-content: center;
+}
+
+.div-graph-btm {
+    width: 100%;
+    height: 400px;
+    background-color: #ffffff;
+    border-radius: 7px;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.graph-heatmap {
+    width: 95%;
+    margin: auto;
+    margin-top: 25px;
+    height: 300px;
+}
+
+
+.graph-user {
+    height: 250px;
+    width: 95%;
+    margin: auto;
+}
+
+.graph-mma {
+    width: 95%;
+    margin: auto;
+    margin-top: 25px;
+    height: 300px;
+}
+
+.graph-network {
+    height: 350px;
+    width: 95%;
+}
+
+
+.div-graph-title {
+    padding: 10px;
+    text-align: center;
+}
+
+.graph-title {
+    font-weight: bold;
+}
+
+
+/*.footer-div {
     text-align: center;
     margin-bottom: 10px;
     margin-top: 40px;
@@ -43,4 +139,4 @@ a {
 
 a:hover {
     font-weight: bold;
-}
+}*/

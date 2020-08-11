@@ -120,5 +120,5 @@ def gen_result(merge_threshold, split_threshold, output_fname):
     fig.show(config={"displayModeBar": False, "showTips": False})
 
 
-# gen_result(merge_threshold=4.5, split_threshold=4.7, output_fname='cluster1.json')
+gen_result(merge_threshold=4.5, split_threshold=4.7, output_fname='cluster1.json')
 gen_result(merge_threshold=2.2, split_threshold=3.5, output_fname='cluster2.json')
